@@ -1,6 +1,6 @@
-Attribute VB_Name = "MÛdulo1"
+Attribute VB_Name = "M√≥dulo1"
 Sub SalvarAba()
-'para isso funcionar, È preciso que as duas planilhas estejam abertas e que essa macro esteja na
+'para isso funcionar, √© preciso que as duas planilhas estejam abertas
 
 
 Dim Wb As Workbook
@@ -11,24 +11,24 @@ Dim Ln As Integer
 
 Set Wb = ThisWorkbook
 
-'---- essa È a planilha que contem o template de cadas
+'---- essa √© a planilha que contem o template de cadas
 Windows("formulario CSC.xlsx").Activate
 '_____________________________________________________________
 
 
-'essa linha ir· ativar a planilha de origem dos dados
+'essa linha ir√° ativar a planilha de origem dos dados
 Set Wt = ActiveWorkbook
 Wb.Activate
 '______________________________________________________________
 
-'o template comeÁar· a ser preenchido a partir da linha 2, por isso È necess·rio ter um cabeÁalho
+'o template come√ßar√° a ser preenchido a partir da linha 2, por isso √© necess√°rio ter um cabe√ßalho
 Range("A2").Select
 Do Until Selection = Empty
 Ln = ActiveCell.Row
 
 
-'aqui escolheremos os campos que ser„o preenchidos, onde do lado esquerdo Wt È a lanilha de cadastro que receber· os dados e na direita
-'como Wb ser· de onde a macro puxar· os dados
+'aqui escolheremos os campos que ser√£o preenchidos, onde do lado esquerdo Wt √© a lanilha de cadastro que receber√° os dados e na direita
+'como Wb ser√° de onde a macro puxar√° os dados
 Wt.Sheets(1).Range("B2") = Wb.Sheets(1).Cells(Ln, 4)
 Wt.Sheets(1).Range("B13") = Wb.Sheets(1).Cells(Ln, 5)
 Wt.Sheets(1).Range("B15") = Wb.Sheets(1).Cells(Ln, 9)
@@ -41,7 +41,7 @@ id = Wb.Sheets(1).Cells(Ln, 1)
 
 Wt.Sheets(1).Name = id
 
-'Aqui escolheremos o diretÛrio onde as fichas de cadastro ser„o salvas
+'Aqui escolheremos o diret√≥rio onde as fichas de cadastro ser√£o salvas
 Wt.SaveAs "e:\e05774\Desktop\SAP\Exemplo\" & id & ".xls"
 
 Selection.Offset(1, 0).Select
