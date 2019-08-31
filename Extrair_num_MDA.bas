@@ -9,12 +9,12 @@ Dim StartPage As Integer
 
 
 StartPage = 10
-EndPage = 100 'p·gina final que ser· varrido
+EndPage = 100 'p√°gina final que ser√° varrido
 
 arq = Application.GetOpenFilename
 
 If arq = "" Then
-MsgBox "escolhe um arquivo ai, vei!"
+MsgBox "escolhe um arquivo!"
 Exit Sub
 End If
 
@@ -28,7 +28,7 @@ Cells(2, 2).Select
 Set oRange = Doc.Range
     
     With oRange.Find
-        .Text = "R$*million" 'mude o padr„o, caso necess·rio.
+        .Text = "R$*million" 'mude o padr√£o, caso necess√°rio.
         .MatchCase = False
         .MatchWholeWord = True
         .MatchWildcards = True
@@ -84,7 +84,7 @@ Dim StartPage As Integer
 
 
 StartPage = 10
-EndPage = 100 'depois da pra trocar, enche o saco n„o...
+EndPage = 100 '
 
 arq = Application.GetOpenFilename
 
@@ -143,19 +143,19 @@ Dim EndPage As Integer
 Dim exl As Workbook
 Dim key As String
 
-'___a key È tipo pra selecionar um tipo de tabela, nesse caso eu quero todas as que tiverem ligaÁ„o ou coluna como o primriro trimestre "marÁo
+'___a key √© tipo pra selecionar um tipo de tabela, nesse caso eu quero todas as que tiverem liga√ß√£o ou coluna como o primriro trimestre "mar√ßo
 key = " "
 Set exl = ThisWorkbook
 
-'Mude a pagina que vc quer comeÁar a capturar as tabelas
+'Mude a pagina que vc quer come√ßar a capturar as tabelas
 StartPage = 20 'da pra mudar depois
-EndPage = 50 'depois da pra trocar, enche o saco n„o...
+EndPage = 50 'depois da pra trocar...
 
 
 arq = Application.GetOpenFilename
 
 If arq = "" Then
-MsgBox "escolhe um arquivo ai, vei!"
+MsgBox "escolha um arquivo!"
 Exit Sub
 End If
 
@@ -373,7 +373,7 @@ Do
 ' Macro2 Macro
 
 Range("C3").Select
-VposiÁ„o = 0
+Vposi√ß√£o = 0
 Vcel = 3
  
 Do
