@@ -1,5 +1,5 @@
 Attribute VB_Name = "Extrair_num_MDA"
-Sub Extract_CircleUptexts()
+Sub Extract_doc_texts()
 Dim MSW As Word.Application
 Dim arq As String
 Dim Doc As Document
@@ -8,18 +8,18 @@ Dim EndPage As Integer
 Dim StartPage As Integer
 
 
-StartPage = 10
-EndPage = 100 'p√°gina final que ser√° varrido
+StartPage = 25
+EndPage = 90 'p·gina final que ser· varrido
 
 arq = Application.GetOpenFilename
 
 If arq = "" Then
-MsgBox "escolhe um arquivo!"
+MsgBox "escolhe um arquivo ai, vei!"
 Exit Sub
 End If
 
 Set MSW = New Word.Application
-MSW.Visible = True
+MSW.Visible = True 'habilite essa funÁ„o caso queira acompanhar o doc
 MSW.Documents.Open (arq)
 
 
@@ -28,7 +28,8 @@ Cells(2, 2).Select
 Set oRange = Doc.Range
     
     With oRange.Find
-        .Text = "R$*million" 'mude o padr√£o, caso necess√°rio.
+        .Text = "R$[1-9]@[!a-z][!a-z] [mb]illion" 'mude o padr„o, caso necess·rio.
+        '.Text = "R$*[bm]illion"
         .MatchCase = False
         .MatchWholeWord = True
         .MatchWildcards = True
@@ -43,14 +44,13 @@ Set oRange = Doc.Range
             
             If Doc.Paragraphs(myPara).Range <> ActiveCell.Offset(-1, 0).Value And Doc.Paragraphs(myPara).Range.Information(wdActiveEndPageNumber) > StartPage Then
             ActiveCell = Doc.Paragraphs(myPara).Range
-            ActiveCell.Offset(0, 5).Value = Doc.Paragraphs(myPara).Range.Information(wdActiveEndPageNumber)
+            ActiveCell.Offset(0, -1).Value = Doc.Paragraphs(myPara).Range.Information(wdActiveEndPageNumber)
             End If
             
             If Doc.Paragraphs(myPara).Range.Information(wdActiveEndPageNumber) > EndPage Then
             MSW.Quit
             Set MSW = Nothing
             Set Doc = Nothing
-            Columns("A:A").Delete
             Rows("1:1").Delete
             Format_MDA
             Exit Sub
@@ -61,9 +61,7 @@ Set oRange = Doc.Range
 
         Wend
     End With
-Columns("A:A").Delete
 Rows("1:1").Delete
-
 
     MSW.Quit
 'Release object references
@@ -74,66 +72,7 @@ Set Doc = Nothing
 Format_MDA
 
 End Sub
-Sub newgg()
-Dim MSW As Word.Application
-Dim arq As String
-Dim Doc As Document
-Dim RG As Range
-Dim EndPage As Integer
-Dim StartPage As Integer
-
-
-StartPage = 10
-EndPage = 100 '
-
-arq = Application.GetOpenFilename
-
-If arq = "" Then
-MsgBox "escolhe um arquivo ai, vei!"
-Exit Sub
-End If
-
-Set MSW = New Word.Application
-MSW.Documents.Open (arq)
-
-
-Set Doc = MSW.ActiveDocument
-Set oRange = Doc.Range
-
-    Columns("A:A").Insert
-    Cells(2, 2).Select
-
-Do While Selection <> Empty
-
-findtext = Left(ActiveCell, 200)
-    With oRange.Find
-        .Text = findtext
-        .MatchCase = False
-        .MatchWholeWord = True
-        .MatchWildcards = True
-        On Error Resume Next
-        oRange.Find.Execute
-            oRange.Select
-            myPara = Doc.Range(0, MSW.Selection.Paragraphs(1).Range.End).Paragraphs.Count
-
-            ActiveCell.Offset(0, -1).Value = Doc.Paragraphs(myPara).Range.Information(wdActiveEndPageNumber)
-       
-       
-            oRange.Collapse wdCollapseEnd
-
-    End With
-    Selection.Offset(1, 0).Select
-Loop
-MSW.Quit
-'Release object references
-
-Set MSW = Nothing
-Set Doc = Nothing
-
-End Sub
-
-
-Sub doc_tables()
+Sub Extract_tables_doc()
 Dim MSW As Word.Application
 Dim arq As String
 Dim Doc As Document
@@ -143,19 +82,22 @@ Dim EndPage As Integer
 Dim exl As Workbook
 Dim key As String
 
-'___a key √© tipo pra selecionar um tipo de tabela, nesse caso eu quero todas as que tiverem liga√ß√£o ou coluna como o primriro trimestre "mar√ßo
-key = " "
+'a key È tipo pra selecionar um tipo de tabela, nesse caso
+'eu quero todas as que tiverem ligaÁ„o ou coluna como o primriro trimestre 'june 30'.
+'caso vc queira pegar todas as tabelas sem dinstinÁ„o, ent„o deixa a key com espeÁo: " "
+key = "June 30"
 Set exl = ThisWorkbook
 
-'Mude a pagina que vc quer come√ßar a capturar as tabelas
-StartPage = 20 'da pra mudar depois
-EndPage = 50 'depois da pra trocar...
+
+'Mude a pagina que vc quer comeÁar a capturar as tabelas
+StartPage = 13 'selecione a pagina onde a macro comeÁar· a busca
+EndPage = 150 'selecione a pagina final da busca...
 
 
 arq = Application.GetOpenFilename
 
 If arq = "" Then
-MsgBox "escolha um arquivo!"
+MsgBox "escolhe um arquivo ai, vei!"
 Exit Sub
 End If
 
@@ -177,7 +119,7 @@ u = 2
     
     On Error Resume Next
     ActiveSheet.Name = "OM page - " & npage
-        
+    
     End If
   Next
  
@@ -195,25 +137,22 @@ End Sub
 Sub Format_MDA()
 Attribute Format_MDA.VB_ProcData.VB_Invoke_Func = " \n14"
 
-    Columns("A:A").ColumnWidth = 100
-    Columns("A:A").WrapText = True
+    Columns("B:B").ColumnWidth = 100
+    Columns("B:B").WrapText = True
 
  
-' extrair Macro
-'
 
-'
-    Range("B1").Select
-    ActiveCell.FormulaR1C1 = _
-        "=MID(RC1,SEARCH(""R$"",RC[-1])+2,SEARCH("" "",RC1,(SEARCH(""R$"",RC[-1]))+2)-(SEARCH(""R$"",RC[-1])+2))"
     Range("C1").Select
     ActiveCell.FormulaR1C1 = _
-        "=MID(RC1,SEARCH(""R$"",RC1,SEARCH(RC[-1],RC1))+2,(SEARCH("" "",RC1,(SEARCH(""R$"",RC1,SEARCH(RC[-1],RC1)))+2))-(SEARCH(""R$"",RC1,SEARCH(RC[-1],RC1))+2))"
-    Range("D1").Select
-    ActiveCell.FormulaR1C1 = _
-        "=MID(RC1,SEARCH(""R$"",RC1,SEARCH(RC[-1],RC1))+2,(SEARCH("" "",RC1,(SEARCH(""R$"",RC1,SEARCH(RC[-1],RC1)))+2))-(SEARCH(""R$"",RC1,SEARCH(RC[-1],RC1))+2))"
-    Range("B1:D1").Copy
-    Range("A1").Select
+        "=MID(RC[-1],SEARCH(""R$"",RC2),SEARCH(""illion"",RC2,SEARCH(""R$"",RC2))-SEARCH(""R$"",RC2)+6)"
+    
+    Range(Selection.Offset(0, 1), Selection.Offset(0, 9)).Select
+    Selection.FormulaR1C1 = _
+        "=MID(RC2,SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2),SEARCH(""illion"",RC2,SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2))-SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2)+6)"
+   
+    Range("C1:K1").Copy
+    
+    Range("B1").Select
     Range(Selection, Selection.End(xlDown)).Offset(0, 1).Select
     
     ActiveSheet.Paste
@@ -223,229 +162,179 @@ Attribute Format_MDA.VB_ProcData.VB_Invoke_Func = " \n14"
 
 
 ' Formatar Macro
-'
 
+   
+Range("B1").Select
+
+For Each tx In Range(Selection, Selection.End(xlDown))
+    Num = tx.Offset(0, 1)
+    n = 1
+    Do While Num <> ""
     
-    Rows("1:1").Select
-    Selection.Insert Shift:=xlDown
-    Columns("F:F").Cut
-    Columns("A:A").Select
-    Selection.Insert Shift:=xlToRight
-    Selection.Insert Shift:=xlToRight
-    Rows("1:1").Insert Shift:=xlDown
-    Columns("A:A").ColumnWidth = 1
-    Range("B2").Value = "PG"
-    Range("C2").Value = "Texto"
-    Range("D2").Value = "Valor 1"
-    Range("E2").Value = "Valor 2"
-    Range("F2").Value = "Valor 3"
+    Vposicao = InStr(tx, Num)
+    Vtamanho = Len(Num)
     
-    Range("B3:F3").Select
+'formatar a fonte
+   With tx.Characters(Start:=Vposicao, Length:=Vtamanho).Font
+        .Name = "Calibri"
+        .FontStyle = "Negrito"
+        .Size = 11
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .Color = -16776961
+        .TintAndShade = 0
+        .ThemeFont = xlThemeFontMinor
+    End With
+    n = n + 1
+    Num = tx.Offset(0, n)
+    Loop
+ Next tx
+'format borders
+    Range("A1:M1").Select
     Range(Selection, Selection.End(xlDown)).Select
-
     With Selection.Borders
-        .LineStyle = xlDash
-        .ColorIndex = xlAutomatic
+        .LineStyle = xlDot
+        .ColorIndex = 0
         .TintAndShade = 0
         .Weight = xlThin
-        End With
-            
-    Range("B2:F2").Select
-    Selection.Font.Bold = True
-    With Selection
-        .HorizontalAlignment = xlCenter
-        .VerticalAlignment = xlBottom
-        .WrapText = False
-        .Orientation = 0
-        .IndentLevel = 0
-        .ReadingOrder = xlContext
-        
     End With
+    
 
-    With Selection.Borders
+   'head table
+    Rows("1:1").Insert Shift:=xlDown
+    Rows("1:1").Insert Shift:=xlDown
+    
+    Range("A2").Value = "Page"
+    Range("B2").Value = "Texto"
+    Range("C2").Value = "VL 1"
+    Range("D2").Value = "VL 2"
+    Range("E2").Value = "VL 3"
+    Range("F2").Value = "VL 4"
+    Range("G2").Value = "VL 5"
+    Range("H2").Value = "VL 6"
+    Range("I2").Value = "VL 7"
+    Range("J2").Value = "VL 8"
+    Range("K2").Value = "VL 9"
+    Range("L2").Value = "VL 10"
+    Range("M2").Value = "VL 11"
+    Range("N2").Value = "VL 12"
+    
+
+    Columns("A:A").Insert Shift:=xlRight
+    Columns("A:A").ColumnWidth = 1
+        
+    Columns("B:O").AutoFit
+    Range("D:O, B:B").Select
+    With Selection
+    
+    .HorizontalAlignment = xlCenter
+    .VerticalAlignment = xlCenter
+    End With
+    
+    Range("B2:O2").Select
+    Selection.Font.Bold = True
+    
+     With Selection.Borders
         .LineStyle = xlContinuous
         .ColorIndex = 0
         .TintAndShade = 0
         .Weight = xlMedium
     End With
-    
+    'Range("D3").Select
+    'ActiveWindow.FreezePanes = True habilite se vc quiser congelar o painel
 
-' Copy_cola Macro
-'
-
-'
-    Columns("D:F").Select
-    Selection.Copy
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
-    Application.CutCopyMode = False
-    ' Numer_format Macro
-'
-
-'
-    Range("D3:F78").Select
-    Selection.Style = "Comma"
-    Selection.NumberFormat = "_-* #,##0.0_-;-* #,##0.0_-;_-* ""-""??_-;_-@_-"
-    Range("B2").Select
-    
-
-' Macro2 Macro
-Dim Vcel As Integer
-Dim Vposicao As Integer
-Dim Vfinal As Integer
-Dim Vtamanho As Integer
-
-
-Range("C3").Select
-Vcel = 3
-
-Do
-    Vposicao = InStr(1, ActiveCell, "R$")
-    If Vposicao > 0 Then
-    Vfinal = InStr(Vposicao, ActiveCell, "million") + 8
-    Vtamanho = Vfinal - Vposicao
-    
-    
-    With ActiveCell.Characters(Start:=Vposicao, Length:=Vtamanho).Font
-        .Name = "Calibri"
-        .FontStyle = "Negrito"
-        .Size = 11
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16776961
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontMinor
-    End With
-    End If
-    
-     Vposicao = InStr(Vfinal, ActiveCell, "R$")
-     If Vposicao > 0 Then
-    Vfinal = InStr(Vposicao, ActiveCell, "million") + 8
-    Vtamanho = Vfinal - Vposicao
-    
-
-   With ActiveCell.Characters(Start:=Vposicao, Length:=Vtamanho).Font
-        .Name = "Calibri"
-        .FontStyle = "Negrito"
-        .Size = 11
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16776961
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontMinor
-    End With
-    End If
-    Vposicao = InStr(Vfinal, ActiveCell, "R$")
-     If Vposicao > 0 Then
-    Vfinal = InStr(Vposicao, ActiveCell, "million") + 8
-    Vtamanho = Vfinal - Vposicao
-    
-
-   With ActiveCell.Characters(Start:=Vposicao, Length:=Vtamanho).Font
-        .Name = "Calibri"
-        .FontStyle = "Negrito"
-        .Size = 11
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16776961
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontMinor
-    End With
-    End If
-    
-    Vcel = Vcel + 1
-    Range("C" & Vcel).Select
-    
- Loop Until Len(ActiveCell) = 0
-
-' Macro2 Macro
-
-Range("C3").Select
-Vposi√ß√£o = 0
-Vcel = 3
- 
-Do
-
-    Vposicao = InStr(1, ActiveCell, "%")
-    If Vposicao > 0 Then
-    Vinicial = InStrRev(ActiveCell, " ", Vposicao)
-    Vtamanho = Vposicao - Vinicial
-    
-    With ActiveCell.Characters(Start:=Vinicial, Length:=Vtamanho + 1).Font
-        .Name = "Calibri"
-        .FontStyle = "Negrito"
-        .Size = 11
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16776961
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontMinor
-    End With
-    End If
-    
-    Vposicao = InStr(Vposicao + 1, ActiveCell, "%")
-    If Vposicao > 0 Then
-    Vinicial = InStrRev(ActiveCell, " ", Vposicao)
-    Vtamanho = Vposicao - Vinicial
-    
-
-   With ActiveCell.Characters(Start:=Vinicial, Length:=Vtamanho + 1).Font
-        .Name = "Calibri"
-        .FontStyle = "Negrito"
-        .Size = 11
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16776961
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontMinor
-    End With
-    End If
-        Vposicao = InStr(Vposicao + 1, ActiveCell, "%")
-    If Vposicao > 0 Then
-    Vinicial = InStrRev(ActiveCell, " ", Vposicao)
-    Vtamanho = Vposicao - Vinicial
-    
-
-   With ActiveCell.Characters(Start:=Vinicial, Length:=Vtamanho + 1).Font
-        .Name = "Calibri"
-        .FontStyle = "Negrito"
-        .Size = 11
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16776961
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontMinor
-    End With
-    End If
-    Vcel = Vcel + 1
-    Range("C" & Vcel).Select
-    
-    Loop Until Len(ActiveCell) = 0
         
 
+End Sub
+
+Sub format_python()
+
+
+Range("A1").Select
+
+For Each tx In Range(Selection, Selection.End(xlDown))
+    Num = tx.Offset(0, 1)
+    n = 1
+    Do While Num <> ""
+    
+    Vposicao = InStr(tx, Num)
+    Vtamanho = Len(Num)
+    
+'formatar a fonte
+   With tx.Characters(Start:=Vposicao, Length:=Vtamanho).Font
+        .Name = "Calibri"
+        .FontStyle = "Negrito"
+        .Size = 11
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .Color = -16776961
+        .TintAndShade = 0
+        .ThemeFont = xlThemeFontMinor
+    End With
+    n = n + 1
+    Num = tx.Offset(0, n)
+    Loop
+ Next tx
+ 
+ 'format borders
+    Columns("A:A").ColumnWidth = 110
+    Columns("A:A").WrapText = True
+    Range("A1:M1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    With Selection.Borders
+        .LineStyle = xlDot
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    
+    Rows("1:1").Insert Shift:=xlDown
+    Rows("1:1").Insert Shift:=xlDown
+    Columns("A:A").Insert Shift:=xlRight
+    Columns("A:A").ColumnWidth = 1
+    
+   'head table
+    Range("B2").Value = "Texto"
+    Range("C2").Value = "VL 1"
+    Range("D2").Value = "VL 2"
+    Range("E2").Value = "VL 3"
+    Range("F2").Value = "VL 4"
+    Range("G2").Value = "VL 5"
+    Range("H2").Value = "VL 6"
+    Range("I2").Value = "VL 7"
+    Range("J2").Value = "VL 8"
+    Range("K2").Value = "VL 9"
+    Range("L2").Value = "VL 10"
+    Range("M2").Value = "VL 11"
+    Range("N2").Value = "VL 12"
+    
+    Columns("B:N").AutoFit
+    Columns("C:N").Select
+    With Selection
+    
+    .HorizontalAlignment = xlCenter
+    .VerticalAlignment = xlCenter
+    End With
+    
+    Range("B2:N2").Select
+    Selection.Font.Bold = True
+    
+     With Selection.Borders
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlMedium
+    End With
+    Range("C3").Select
+    'ActiveWindow.FreezePanes = True habilite se vc quiser congelar o painel
+    
 End Sub
 
