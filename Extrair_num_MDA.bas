@@ -8,8 +8,8 @@ Dim EndPage As Integer
 Dim StartPage As Integer
 
 
-StartPage = 25
-EndPage = 90 'página final que será varrido
+StartPage = 1
+EndPage = 300 'página final que será varrido
 
 arq = Application.GetOpenFilename
 
@@ -19,7 +19,7 @@ Exit Sub
 End If
 
 Set MSW = New Word.Application
-MSW.Visible = True 'habilite essa função caso queira acompanhar o doc
+'MSW.Visible = True
 MSW.Documents.Open (arq)
 
 
@@ -28,8 +28,7 @@ Cells(2, 2).Select
 Set oRange = Doc.Range
     
     With oRange.Find
-        .Text = "R$[1-9]@[!a-z][!a-z] [mb]illion" 'mude o padrão, caso necessário.
-        '.Text = "R$*[bm]illion"
+        .Text = " [1-9]@[!a-z][!a-z][mb]ilhões" 'mude o padrão, caso necessário.
         .MatchCase = False
         .MatchWholeWord = True
         .MatchWildcards = True
@@ -85,13 +84,13 @@ Dim key As String
 'a key é tipo pra selecionar um tipo de tabela, nesse caso
 'eu quero todas as que tiverem ligação ou coluna como o primriro trimestre 'june 30'.
 'caso vc queira pegar todas as tabelas sem dinstinção, então deixa a key com espeço: " "
-key = "June 30"
+key = " "
 Set exl = ThisWorkbook
 
 
 'Mude a pagina que vc quer começar a capturar as tabelas
-StartPage = 13 'selecione a pagina onde a macro começará a busca
-EndPage = 150 'selecione a pagina final da busca...
+StartPage = 1 'selecione a pagina onde a macro começará a busca
+EndPage = 100 'selecione a pagina final da busca...
 
 
 arq = Application.GetOpenFilename
@@ -102,7 +101,7 @@ Exit Sub
 End If
 
 Set MSW = New Word.Application
-MSW.Visible = True
+'MSW.Visible = True
 MSW.Documents.Open (arq)
 
 Set Doc = MSW.ActiveDocument
@@ -114,21 +113,22 @@ u = 2
   If t.Range.Find.Execute(key) = True And npage > StartPage And npage < EndPage Then
     t.Range.Copy
     exl.Sheets.Add After:=ActiveSheet
-    Columns("A:A").ColumnWidth = 45.29
+    Columns("A:B").ColumnWidth = 46
     exl.ActiveSheet.Paste
     
     On Error Resume Next
     ActiveSheet.Name = "OM page - " & npage
-    
+  
     End If
+
   Next
  
 
 'Release object references
-
+MSW.Quit
 Set MSW = Nothing
 Set Doc = Nothing
-MSW.Quit
+
 
 
 
@@ -143,14 +143,16 @@ Attribute Format_MDA.VB_ProcData.VB_Invoke_Func = " \n14"
  
 
     Range("C1").Select
-    ActiveCell.FormulaR1C1 = _
-        "=MID(RC[-1],SEARCH(""R$"",RC2),SEARCH(""illion"",RC2,SEARCH(""R$"",RC2))-SEARCH(""R$"",RC2)+6)"
+  'pegar os numeros em R$
     
-    Range(Selection.Offset(0, 1), Selection.Offset(0, 9)).Select
+    ActiveCell.FormulaR1C1 = _
+        "=MID(RC[-1],SEARCH(""R$"",RC2),SEARCH(""ilhões"",RC2,SEARCH(""R$"",RC2))-SEARCH(""R$"",RC2)+6)"
+    
+    Range(Selection.Offset(0, 1), Selection.Offset(0, 11)).Select
     Selection.FormulaR1C1 = _
-        "=MID(RC2,SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2),SEARCH(""illion"",RC2,SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2))-SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2)+6)"
+        "=MID(RC2,SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2),SEARCH(""ilhões"",RC2,SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2))-SEARCH(""R$"",RC2,SEARCH(RC[-1],RC2)+2)+6)"
    
-    Range("C1:K1").Copy
+    Range("C1:N1").Copy
     
     Range("B1").Select
     Range(Selection, Selection.End(xlDown)).Offset(0, 1).Select
@@ -160,6 +162,41 @@ Attribute Format_MDA.VB_ProcData.VB_Invoke_Func = " \n14"
     Selection.SpecialCells(xlCellTypeFormulas, 16).Select
     Selection.ClearContents
 
+Dim i As Range
+'Pegar os números em %
+Range("C1").Select
+For Each i In Range(Selection, Selection.End(xlDown))
+       
+    i.Select
+    Do While Selection <> Empty And Selection <> Error
+    Selection.Offset(0, 1).Select
+    Loop
+            
+        Selection.FormulaR1C1 = _
+        "=MID(RC2,SEARCH("" "",RC2,SEARCH(""%"",RC2)-7),SEARCH("" "",RC2,SEARCH(""%"",RC2))-SEARCH("" "",RC2,SEARCH(""%"",RC2)-6))"
+    
+Next i
+    
+
+Range("B1").Select
+    Range(Selection, Selection.End(xlDown)).Offset(0, 1).Select
+    Range(Selection, Selection.Offset(0, 11)).Select
+    Selection.SpecialCells(xlCellTypeBlanks).Select
+    Selection.FormulaR1C1 = _
+        "=MID(RC2,SEARCH("" "",RC2,SEARCH(""%"",RC2,SEARCH(RC[-1],RC2)+LEN(RC[-1]))-6),SEARCH("" "",RC2,SEARCH(""%"",RC2,SEARCH(RC[-1],RC2)+LEN(RC[-1])))-SEARCH("" "",RC2,SEARCH(""%"",RC2,SEARCH(RC[-1],RC2)+LEN(RC[-1]))-6))"
+ 
+  Range("B1").Select
+    Range(Selection, Selection.End(xlDown)).Offset(0, 1).Select
+    Range(Selection, Selection.Offset(0, 12)).Select
+    Selection.SpecialCells(xlCellTypeFormulas, 16).Select
+    Selection.ClearContents
+    
+ Range("B1").Select
+    Range(Selection, Selection.End(xlDown)).Offset(0, 1).Select
+    Range(Selection, Selection.Offset(0, 12)).Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
 
 ' Formatar Macro
 
